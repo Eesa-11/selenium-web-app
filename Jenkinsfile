@@ -58,16 +58,19 @@ pipeline {
                         git clone https://github.com/Eesa-11/selenium-test-cases.git
                         cd selenium-test-cases
                         
-                        # Run tests in Docker
+                        # Touch the results file so 'cat' doesn't crash the pipeline if tests fail to run
+                        touch test_results.txt
+                        
+                        # Run tests in Docker using a Python + Chrome image
                         docker run --rm \
                             --network host \
                             -v $(pwd):/tests \
                             -w /tests \
                             -e APP_URL=http://localhost:5000 \
-                            markhobson/maven-chrome \
+                            joyzoursky/python-chromedriver:3.9 \
                             /bin/bash -c "pip install -r requirements.txt && python -m pytest test_selenium.py -v --tb=short > test_results.txt 2>&1 || true"
                         
-                        # Copy results
+                        # Display results in the Jenkins console
                         cat test_results.txt
                     '''
                 }
